@@ -1,0 +1,29 @@
+[
+  {
+    "id": "lexirag-bench-001",
+    "source_text": "The tenant shall pay a monthly rent of Rs. 15,000 on or before the 5th day of each month.",
+    "target_language": "te",
+    "reference_translation": "\u0c05\u0c21\u0c4d\u0c21\u0c17\u0c26\u0c3e\u0c30\u0c41 \u0c2a\u0c4d\u0c30\u0c24\u0c3f \u0c28\u0c46\u0c32\u0c32\u0c4b 5\u0c35 \u0c24\u0c47\u0c26\u0c40\u0c32\u0c4b\u0c17\u0c3e \u0c30\u0c42.15,000 \u0c05\u0c26\u0c46 \u0c1a\u0c46\u0c32\u0c4d\u0c32\u0c3f\u0c02\u0c1a\u0c3e\u0c32\u0c3f.",
+    "document_category": "lease_agreement",
+    "language_identifier": "en-te",
+    "evaluation_split": "dev"
+  },
+  {
+    "id": "lexirag-bench-002",
+    "source_text": "Either party may terminate this agreement by providing thirty days written notice.",
+    "target_language": "hi",
+    "reference_translation": "\u0915\u094b\u0908 \u092d\u0940 \u092a\u0915\u094d\u0937 \u0924\u0940\u0938 \u0926\u093f\u0928 \u0915\u0940 \u0932\u093f\u0916\u093f\u0924 \u0938\u0942\u091a\u0928\u093e \u0926\u0947\u0915\u0930 \u0907\u0938 \u0938\u092e\u091d\u094c\u0924\u0947 \u0915\u094b \u0938\u092e\u093e\u092a\u094d\u0924 \u0915\u0930 \u0938\u0915\u0924\u093e \u0939\u0948\u0964",
+    "document_category": "termination_clause",
+    "language_identifier": "en-hi",
+    "evaluation_split": "dev"
+  },
+  {
+    "id": "lexirag-bench-003",
+    "source_text": "This confidentiality clause survives termination of the agreement for a period of two years.",
+    "target_language": "te",
+    "reference_translation": "\u0c08 \u0c17\u0c4b\u0c2a\u0c4d\u0c2f\u0c24\u0c3e \u0c28\u0c3f\u0c2c\u0c02\u0c27\u0c28 \u0c12\u0c2a\u0c4d\u0c2a\u0c02\u0c26\u0c02 \u0c2e\u0c41\u0c17\u0c3f\u0c1e\u0c4d\u0c1a\u0c3f\u0c28 \u0c24\u0c30\u0c41\u0c35\u0c3e\u0c24 \u0c30\u0c46\u0c02\u0c21\u0c41 \u0c38\u0c02\u0c35\u0c24\u0c4d\u0c38\u0c30\u0c3e\u0c32 \u0c2a\u0c3e\u0c1f\u0c41 \u0c15\u0c4a\u0c28\u0c38\u0c3e\u0c17\u0c41\u0c24\u0c41\u0c02\u0c26\u0c3f.",
+    "document_category": "confidentiality_clause",
+    "language_identifier": "en-te",
+    "evaluation_split": "test"
+  }
+]
