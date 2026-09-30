@@ -101,12 +101,26 @@ const BiasFairness = () => {
                 {result.results.map((r) => (
                   <div key={r.language} className="card p-4">
                     <p className="text-xs font-medium text-slate-400 uppercase mb-2">{r.language}</p>
-                    {Object.entries(r.metricValues || {}).map(([k, v]) => (
-                      <div key={k} className="flex justify-between text-sm py-1">
-                        <span className="text-slate-500">{k.replace(/_/g, " ")}</span>
-                        <span className="font-medium">{String(v ?? "—")}</span>
-                      </div>
-                    ))}
+                    <div className="space-y-2">
+                      {Object.entries(r.metricValues || {}).map(([k, v]) => {
+                        const isLong = typeof v === "string" && v.length > 30;
+                        return isLong ? (
+                          <div key={k} className="pt-2 border-t border-slate-100 dark:border-slate-800/80">
+                            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1">
+                              {k.replace(/_/g, " ")}
+                            </span>
+                            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
+                              {String(v ?? "—")}
+                            </p>
+                          </div>
+                        ) : (
+                          <div key={k} className="flex justify-between items-center text-xs py-1">
+                            <span className="text-slate-500 font-medium capitalize">{k.replace(/_/g, " ")}</span>
+                            <span className="font-semibold text-slate-800 dark:text-slate-200">{String(v ?? "—")}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
                     {r.findings?.length > 0 && (
                       <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                         <p className="text-xs text-slate-400 mb-1">Notable gaps</p>

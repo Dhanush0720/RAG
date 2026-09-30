@@ -17,12 +17,30 @@ from app.services.embedding_service import embed_texts, embed_query
 os.makedirs(settings.VECTOR_STORE_DIR, exist_ok=True)
 
 
+def _find_store_file(filename: str) -> str:
+    # Check configured directory first
+    configured = os.path.join(settings.VECTOR_STORE_DIR, filename)
+    if os.path.exists(configured):
+        return configured
+    # Check alternative common locations (current working dir or ai-service subdir)
+    candidates = [
+        os.path.join(os.getcwd(), "vector_store", filename),
+        os.path.join(os.getcwd(), "ai-service", "vector_store", filename),
+        os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "vector_store", filename),
+        os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "vector_store", filename),
+    ]
+    for p in candidates:
+        if os.path.exists(p):
+            return p
+    return configured
+
+
 def _index_path(document_id: str) -> str:
-    return os.path.join(settings.VECTOR_STORE_DIR, f"{document_id}.faiss")
+    return _find_store_file(f"{document_id}.faiss")
 
 
 def _meta_path(document_id: str) -> str:
-    return os.path.join(settings.VECTOR_STORE_DIR, f"{document_id}.meta.json")
+    return _find_store_file(f"{document_id}.meta.json")
 
 
 def build_index(document_id: str, chunks: List[Dict]) -> None:

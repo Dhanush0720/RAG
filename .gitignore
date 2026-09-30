@@ -7,4 +7,5 @@ venv/
 .venv/
 backend/uploads/
 ai-service/vector_store/
+vector_store/
 .DS_Store
