@@ -8,7 +8,8 @@ export const protect = async (req, res, next) => {
       return res.status(401).json({ error: "Not authenticated. Missing token." });
     }
     const token = header.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const secret = process.env.JWT_SECRET || "lexirag_default_jwt_secret_dev_fallback_2024_secure_key";
+    const decoded = jwt.verify(token, secret);
     const user = await User.findById(decoded.id).select("-passwordHash");
     if (!user) return res.status(401).json({ error: "User no longer exists." });
     req.user = user;

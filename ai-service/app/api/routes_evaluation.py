@@ -35,5 +35,10 @@ class AuditRequest(BaseModel):
 
 @router.post("/audit")
 def run_audit_route(req: AuditRequest):
-    result = run_cross_language_audit(req.documentId, req.languages)
+    try:
+        result = run_cross_language_audit(req.documentId, req.languages)
+    except LLMNotConfiguredError as e:
+        raise HTTPException(status_code=424, detail=str(e))
+    except LLMRequestError as e:
+        raise HTTPException(status_code=502, detail=str(e))
     return result

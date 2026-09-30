@@ -20,34 +20,58 @@ class LLMRequestError(Exception):
     pass
 
 
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=8))
+@retry(stop=stop_after_attempt(4), wait=wait_exponential(multiplier=1.5, min=2, max=10), reraise=True)
 def _call_gemini(prompt: str, system: str = "") -> str:
     if not settings.GEMINI_API_KEY:
         raise LLMNotConfiguredError(
             "GEMINI_API_KEY is not set. Add it to ai-service/.env to enable generation."
         )
-    url = (
-        f"https://generativelanguage.googleapis.com/v1beta/models/"
-        f"{settings.GEMINI_MODEL}:generateContent?key={settings.GEMINI_API_KEY}"
-    )
-    payload = {
-        "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-    }
-    if system:
-        payload["systemInstruction"] = {"parts": [{"text": system}]}
 
-    with httpx.Client(timeout=60) as client:
-        resp = client.post(url, json=payload)
-    if resp.status_code != 200:
-        raise LLMRequestError(f"Gemini API error {resp.status_code}: {resp.text[:300]}")
-    data = resp.json()
-    try:
-        return data["candidates"][0]["content"]["parts"][0]["text"]
-    except (KeyError, IndexError):
-        raise LLMRequestError("Unexpected Gemini response shape.")
+    models_to_try = [settings.GEMINI_MODEL]
+    for fallback in ["gemini-flash-latest", "gemini-3-flash-preview"]:
+        if fallback not in models_to_try:
+            models_to_try.append(fallback)
+
+    last_error = None
+    for model_name in models_to_try:
+        url = (
+            f"https://generativelanguage.googleapis.com/v1beta/models/"
+            f"{model_name}:generateContent?key={settings.GEMINI_API_KEY}"
+        )
+        payload = {
+            "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+        }
+        if system:
+            payload["systemInstruction"] = {"parts": [{"text": system}]}
+
+        with httpx.Client(timeout=60) as client:
+            resp = client.post(url, json=payload)
+
+        if resp.status_code == 200:
+            data = resp.json()
+            try:
+                return data["candidates"][0]["content"]["parts"][0]["text"]
+            except (KeyError, IndexError):
+                raise LLMRequestError("Unexpected Gemini response shape.")
+
+        err_msg = ""
+        try:
+            err_data = resp.json().get("error", {})
+            err_msg = err_data.get("message", "")
+        except Exception:
+            pass
+        if not err_msg:
+            err_msg = resp.text[:200]
+
+        last_error = f"Gemini API ({resp.status_code}) on {model_name}: {err_msg}"
+        if resp.status_code in (404, 429, 503):
+            continue
+        break
+
+    raise LLMRequestError(last_error or "Failed to call Gemini API.")
 
 
-@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=8))
+@retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1.5, min=2, max=12), reraise=True)
 def _call_openai_compatible(prompt: str, system: str = "") -> str:
     if not settings.OPENAI_COMPATIBLE_API_KEY:
         raise LLMNotConfiguredError(

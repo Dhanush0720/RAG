@@ -40,6 +40,30 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  const forgotPassword = useCallback(async (email) => {
+    setLoading(true);
+    try {
+      const { data } = await api.post("/auth/forgot-password", { email });
+      return { success: true, message: data.message, simulated: data.simulated, resetUrl: data.resetUrl };
+    } catch (err) {
+      return { success: false, error: getErrorMessage(err) };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const resetPassword = useCallback(async (token, newPassword) => {
+    setLoading(true);
+    try {
+      const { data } = await api.post("/auth/reset-password", { token, newPassword });
+      return { success: true, message: data.message };
+    } catch (err) {
+      return { success: false, error: getErrorMessage(err) };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const logout = useCallback(() => {
     localStorage.removeItem("lexirag_token");
     localStorage.removeItem("lexirag_user");
@@ -47,7 +71,17 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        login,
+        register,
+        logout,
+        forgotPassword,
+        resetPassword,
+        loading,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
