@@ -40,7 +40,14 @@ def extract_text_pdf(path: str) -> List[Dict]:
 
 def extract_text_docx(path: str) -> List[Dict]:
     doc = DocxDocument(path)
-    full_text = "\n".join(p.text for p in doc.paragraphs)
+    paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
+    table_texts = []
+    for table in doc.tables:
+        for row in table.rows:
+            row_text = " | ".join(cell.text.strip() for cell in row.cells if cell.text.strip())
+            if row_text:
+                table_texts.append(row_text)
+    full_text = "\n".join(paragraphs + table_texts)
     # DOCX has no native page concept without a rendering engine; treat as one page.
     return [{"page_number": 1, "text": full_text, "likely_scanned": False}]
 

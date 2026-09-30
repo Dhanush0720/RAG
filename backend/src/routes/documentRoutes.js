@@ -7,6 +7,7 @@ import {
   getDocument,
   getDocumentStatus,
   deleteDocument,
+  reprocessDocument,
 } from "../controllers/documentController.js";
 
 const router = express.Router();
@@ -16,6 +17,7 @@ router.post("/upload", upload.single("file"), uploadDocument);
 router.get("/", listDocuments);
 router.get("/:id", getDocument);
 router.get("/:id/status", getDocumentStatus);
+router.post("/:id/retry", reprocessDocument);
 router.delete("/:id", deleteDocument);
 
 export default router;

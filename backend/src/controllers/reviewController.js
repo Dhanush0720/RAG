@@ -1,5 +1,6 @@
 import ReviewReport from "../models/ReviewReport.js";
 import Document from "../models/Document.js";
+import DocumentChunk from "../models/DocumentChunk.js";
 import { generateReview } from "../services/aiServiceClient.js";
 
 export const createReview = async (req, res, next) => {
@@ -11,7 +12,11 @@ export const createReview = async (req, res, next) => {
       return res.status(400).json({ error: `Document is not ready yet (status: ${doc.status}).` });
     }
 
-    const aiResult = await generateReview({ documentId });
+    const chunks = await DocumentChunk.find({ documentId: doc._id })
+      .select("chunkIndex content pageNumber metadata -_id")
+      .lean();
+
+    const aiResult = await generateReview({ documentId, chunks });
 
     const review = await ReviewReport.create({
       userId: req.user._id,

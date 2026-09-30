@@ -20,12 +20,12 @@ LIMITATIONS = [
 ]
 
 
-def run_cross_language_audit(document_id: str, languages: List[str]) -> Dict:
+def run_cross_language_audit(document_id: str, languages: List[str], chunks: List[Dict] = None) -> Dict:
     languages = [l for l in languages if l in LANGUAGE_NAMES] or ["en"]
 
     per_language_summaries = {}
     for lang in languages:
-        result = generate_summary(document_id, "executive", lang, "medium")
+        result = generate_summary(document_id, "executive", lang, "medium", chunks=chunks)
         per_language_summaries[lang] = result["content"]
 
     comparison_block = "\n\n".join(

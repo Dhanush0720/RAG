@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Trash2, MessageSquare, FileStack, ClipboardCheck } from "lucide-react";
+import { Trash2, MessageSquare, FileStack, ClipboardCheck, RefreshCw } from "lucide-react";
 import DashboardLayout from "../components/DashboardLayout.jsx";
 import { Loading, ErrorState, EmptyState, StatusBadge } from "../components/StateViews.jsx";
 import api, { getErrorMessage } from "../services/api.js";
@@ -24,6 +24,15 @@ const Documents = () => {
     const interval = setInterval(load, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  const handleRetry = async (id) => {
+    try {
+      await api.post(`/documents/${id}/retry`);
+      load();
+    } catch (err) {
+      alert("Failed to retry: " + getErrorMessage(err));
+    }
+  };
 
   const handleDelete = async (id) => {
     if (!confirm("Delete this document? This cannot be undone.")) return;
@@ -77,6 +86,15 @@ const Documents = () => {
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <StatusBadge status={doc.status} />
+                {doc.status === "failed" && (
+                  <button
+                    onClick={() => handleRetry(doc._id)}
+                    className="p-2 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20 text-amber-600 dark:text-amber-400"
+                    title="Retry indexing"
+                  >
+                    <RefreshCw size={16} />
+                  </button>
+                )}
                 <button
                   disabled={doc.status !== "indexed"}
                   onClick={() => navigate("/chat", { state: { documentId: doc._id } })}

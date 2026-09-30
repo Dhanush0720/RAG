@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Dict
 
 from app.api.deps import verify_internal_token
 from app.services.evaluation_service import run_experiment
@@ -31,12 +31,13 @@ class AuditRequest(BaseModel):
     documentId: str
     languages: List[str] = ["en", "te", "hi"]
     auditType: str = "cross_language_consistency"
+    chunks: Optional[List[Dict]] = None
 
 
 @router.post("/audit")
 def run_audit_route(req: AuditRequest):
     try:
-        result = run_cross_language_audit(req.documentId, req.languages)
+        result = run_cross_language_audit(req.documentId, req.languages, chunks=req.chunks)
     except LLMNotConfiguredError as e:
         raise HTTPException(status_code=424, detail=str(e))
     except LLMRequestError as e:

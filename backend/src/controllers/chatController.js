@@ -1,6 +1,7 @@
 import Conversation from "../models/Conversation.js";
 import Message from "../models/Message.js";
 import Document from "../models/Document.js";
+import DocumentChunk from "../models/DocumentChunk.js";
 import { queryDocument } from "../services/aiServiceClient.js";
 
 export const createConversation = async (req, res, next) => {
@@ -49,11 +50,17 @@ export const sendMessage = async (req, res, next) => {
     // Retrieve prior turns for light conversational context.
     const history = await Message.find({ conversationId }).sort({ createdAt: 1 }).limit(20);
 
+    // Retrieve chunk evidence from Mongo so AI service has vectors even on ephemeral or separate containers
+    const chunks = await DocumentChunk.find({ documentId: doc._id })
+      .select("chunkIndex content pageNumber metadata -_id")
+      .lean();
+
     const aiResult = await queryDocument({
       documentId: doc._id.toString(),
       question: content,
       language: language || convo.language || "en",
       history: history.map((m) => ({ role: m.role, content: m.content })),
+      chunks,
     });
 
     const assistantMsg = await Message.create({

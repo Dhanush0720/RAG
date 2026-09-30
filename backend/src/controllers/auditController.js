@@ -1,5 +1,6 @@
 import AuditResult from "../models/AuditResult.js";
 import Document from "../models/Document.js";
+import DocumentChunk from "../models/DocumentChunk.js";
 import { runAudit } from "../services/aiServiceClient.js";
 
 export const triggerAudit = async (req, res, next) => {
@@ -8,10 +9,15 @@ export const triggerAudit = async (req, res, next) => {
     const doc = await Document.findOne({ _id: documentId, userId: req.user._id });
     if (!doc) return res.status(404).json({ error: "Document not found." });
 
+    const chunks = await DocumentChunk.find({ documentId: doc._id })
+      .select("chunkIndex content pageNumber metadata -_id")
+      .lean();
+
     const aiResult = await runAudit({
       documentId,
       languages: languages && languages.length ? languages : ["en", "te", "hi"],
       auditType: auditType || "cross_language_consistency",
+      chunks,
     });
 
     const rows = (aiResult.perLanguage || []).map((r) => ({

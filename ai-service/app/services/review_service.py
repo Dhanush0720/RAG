@@ -46,8 +46,14 @@ def _extract_json(text: str) -> Dict:
     return {"findings": [], "importantClauses": [], "potentialIssues": [], "parse_error": True}
 
 
-def generate_review(document_id: str) -> Dict:
-    chunks = _load_all_chunks(document_id)
+def generate_review(document_id: str, chunks: List[Dict] = None) -> Dict:
+    from app.services.retrieval_service import has_index, build_index
+    if chunks:
+        if not has_index(document_id):
+            build_index(document_id, chunks)
+    else:
+        chunks = _load_all_chunks(document_id)
+
     if not chunks:
         return {"findings": [], "importantClauses": [], "potentialIssues": [], "sourceReferences": []}
 

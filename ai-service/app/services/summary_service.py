@@ -31,8 +31,14 @@ def _load_all_chunks(document_id: str) -> List[Dict]:
         return []
 
 
-def generate_summary(document_id: str, summary_type: str, language: str, length: str) -> Dict:
-    chunks = _load_all_chunks(document_id)
+def generate_summary(document_id: str, summary_type: str, language: str, length: str, chunks: List[Dict] = None) -> Dict:
+    from app.services.retrieval_service import has_index, build_index
+    if chunks:
+        if not has_index(document_id):
+            build_index(document_id, chunks)
+    else:
+        chunks = _load_all_chunks(document_id)
+
     if not chunks:
         return {
             "content": "This document has not been indexed yet, so no summary can be generated.",

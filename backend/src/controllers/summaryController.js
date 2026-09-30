@@ -1,5 +1,6 @@
 import Summary from "../models/Summary.js";
 import Document from "../models/Document.js";
+import DocumentChunk from "../models/DocumentChunk.js";
 import { generateSummary } from "../services/aiServiceClient.js";
 
 export const createSummary = async (req, res, next) => {
@@ -11,11 +12,16 @@ export const createSummary = async (req, res, next) => {
       return res.status(400).json({ error: `Document is not ready yet (status: ${doc.status}).` });
     }
 
+    const chunks = await DocumentChunk.find({ documentId: doc._id })
+      .select("chunkIndex content pageNumber metadata -_id")
+      .lean();
+
     const aiResult = await generateSummary({
       documentId,
       summaryType: summaryType || "executive",
       language: language || "en",
       length: length || "medium",
+      chunks,
     });
 
     const summary = await Summary.create({

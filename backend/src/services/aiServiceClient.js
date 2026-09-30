@@ -6,6 +6,8 @@ import axios from "axios";
 const aiClient = axios.create({
   baseURL: process.env.AI_SERVICE_URL || "http://localhost:8000",
   timeout: parseInt(process.env.AI_SERVICE_TIMEOUT_MS, 10) || 300000,
+  maxBodyLength: Infinity,
+  maxContentLength: Infinity,
 });
 
 aiClient.interceptors.request.use((config) => {

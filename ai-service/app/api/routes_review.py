@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
+from typing import Optional, List, Dict
+
 from app.api.deps import verify_internal_token
 from app.services.review_service import generate_review
 from app.services.llm_service import LLMNotConfiguredError, LLMRequestError
@@ -10,12 +12,13 @@ router = APIRouter(prefix="/review", tags=["review"], dependencies=[Depends(veri
 
 class ReviewRequest(BaseModel):
     documentId: str
+    chunks: Optional[List[Dict]] = None
 
 
 @router.post("/generate")
 def generate_review_route(req: ReviewRequest):
     try:
-        result = generate_review(req.documentId)
+        result = generate_review(req.documentId, chunks=req.chunks)
     except LLMNotConfiguredError as e:
         raise HTTPException(status_code=424, detail=str(e))
     except LLMRequestError as e:
